@@ -1,0 +1,25 @@
+{
+  "name": "jsonscript-express",
+  "version": "0.0.0",
+  "description": "Express middleware for batch processing using JSONScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JSONScript/jsonscript-express.git"
+  },
+  "keywords": [
+    "JSONScript",
+    "express",
+    "batch",
+    "middleware"
+  ],
+  "author": "Evgeny Poberezkin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JSONScript/jsonscript-express/issues"
+  },
+  "homepage": "https://github.com/JSONScript/jsonscript-express#readme"
+}

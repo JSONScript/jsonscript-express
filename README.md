@@ -90,6 +90,43 @@ JSONScript also supports sequential evaluation, conditionals, data manipulation 
 See [JSONScript Language](https://github.com/JSONScript/jsonscript/blob/master/LANGUAGE.md) for more information.
 
 
+## API
+
+##### jsonscript(Express app [, Object options]) -&gt; Function
+
+Create express route handling function to process JSONScript. Both the `script` and the `data` instance should be properties of the request body:
+
+```javascript
+{
+  "script": {
+    // JSONScript, can be an array
+  },
+  "data": {
+    // data instance that can be used from the script,
+    // can be array
+  }
+}
+```
+
+## Options
+
+Defaults:
+
+```javascript
+{
+  routerExecutor: 'router',
+  basePath: '',
+  jsonscript: { strict: true },
+  Promise: undefined
+}
+```
+
+- _routerExecutor_: the name of the executor (the value of "$exec" keyword in the instruction) used to access Express router, `"router"` is used by default.
+- _basePath_: the path used as a prefix to paths in the script $exec instruction arguments.
+- _jsonscript_: options passed to JSONScript interpreter [jsonscript-js](https://github.com/JSONScript/jsonscript-js).
+- _Promise_: an optional Promise class, the native Promise is used by default.
+
+
 ## License
 
 [MIT](https://github.com/JSONScript/jsonscript-express/blob/master/LICENSE)

@@ -2,6 +2,11 @@
 
 Express middleware for batch processing using [JSONScript](https://github.com/JSONScript/jsonscript).
 
+[![Build Status](https://travis-ci.org/JSONScript/jsonscript-express.svg?branch=master)](https://travis-ci.org/JSONScript/jsonscript-express)
+[![npm version](https://badge.fury.io/js/jsonscript-express.svg)](https://www.npmjs.com/package/jsonscript-express)
+[![Code Climate](https://codeclimate.com/github/JSONScript/jsonscript-express/badges/gpa.svg)](https://codeclimate.com/github/JSONScript/jsonscript-express)
+[![Coverage Status](https://coveralls.io/repos/github/JSONScript/jsonscript-express/badge.svg?branch=master)](https://coveralls.io/github/JSONScript/jsonscript-express?branch=master)
+
 
 ## Install
 

@@ -7,14 +7,25 @@ var processRequest = require('supertest');
 module.exports = jsonscriptExpress;
 
 
+var METHODS = ['get', 'post', 'put', 'delete'];
 function jsonscriptExpress(app, options) {
   options = _.defaults(options, {
     routerExecutor: 'router',
-    // endpoint: 'jsonscript',
     basePath: '',
-    jsonscript: { strict: true }
+    jsonscript: { strict: true },
+    Promise: (typeof Promise !== 'undefined') && Promise
   });
   var js = JSONScript(options.jsonscript);
+  METHODS.forEach(function (method) {
+    execRouter[method] = function(args) {
+      if (args.method && args.method != method) {
+        console.warn('method specified in args (' + args.method +
+                      ') is different from $method in instruction (' + method + '), used ' + method);
+      }
+      args.method = method;
+      return execRouter(args);
+    };
+  });
   js.addExecutor(options.routerExecutor, execRouter);
   evaluator.js = js;
 
@@ -53,7 +64,7 @@ function jsonscriptExpress(app, options) {
     if (args.headers) request.set(args.headers);
     if (args.body) request.send(args.body);
 
-    return new Promise(function (resolve, reject) {
+    return new options.Promise(function (resolve, reject) {
       request.end(function (err, resp) {
         if (err) return reject(err);
         resp = _.pick(resp, 'statusCode', 'headers', 'body');
@@ -62,4 +73,4 @@ function jsonscriptExpress(app, options) {
       });
     });
   }
-};
+}

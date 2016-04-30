@@ -1,11 +1,18 @@
 'use strict';
 
 var test = require('supertest');
-var app = require('./app');
+var createApp = require('./app');
 var assert = require('assert');
 
 
 describe('jsonscript handler', function() {
+  var app;
+
+  beforeEach(function() {
+    app = createApp();
+  });
+
+
   describe('single instruction without $method', function() {
     it('should process GET', function (done) {
       test(app)
@@ -174,6 +181,35 @@ describe('jsonscript handler', function() {
         assertGetResult(resp.body[0], 'object', '1');
         assertPostResult(resp.body[1], 'object', { foo: 'bar' });
         done();
+      });
+    });
+  });
+
+
+  describe('options', function() {
+    describe('processResponse: "body"', function() {
+      beforeEach(function() {
+        app = createApp({ processResponse: 'body' });
+      });
+
+      it('should return response body only', function (done) {
+        test(app)
+        .post('/js')
+        .set('Accept', 'application/json')
+        .send({
+          script: {
+            $exec: 'router',
+            $args: {
+              method: 'get',
+              path: '/object/1'
+            }
+          }
+        })
+        .expect(200)
+        .end(function (err, resp) {
+          assert.deepEqual(resp.body, { name: 'object', id: 1, info: 'resource object id 1' });
+          done();
+        });
       });
     });
   });

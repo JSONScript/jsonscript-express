@@ -49,13 +49,14 @@ app.listen(3000);
 
 Now you can send POST requests to `/js` endpoint with the body containing the script and an optional data instance that will be processed by JSONScript interpreter. For example, with this request:
 
-```json
+```javascript
 {
   "script": {
     "res1": {
-      "$exec": "router",
-      "$method": "get",
+      "$exec": "router", // executor name can be changed in options
+      "$method": "get",  // $method can be get/post/put/delete
       "$args": { "path": "/resource/1" }
+      // method property in $args can be used instead of $method
     },
     "res2": {
       "$exec": "router",
@@ -82,6 +83,15 @@ the response will be a combination of two responses (both requests are processed
     "request": { "method": "get", "path": "/resource/2" },
     "body": { /* response body 2 */ }
   }
+}
+```
+
+If option `processResponse: "body"` were used the result would have been:
+
+```javascript
+{
+  "res1": { /* response body 1 */ },
+  "res2": { /* response body 2 */ }
 }
 ```
 
@@ -116,6 +126,7 @@ Defaults:
 {
   routerExecutor: 'router',
   basePath: '',
+  processResponse: undefined,
   jsonscript: { strict: true },
   Promise: undefined
 }
@@ -123,6 +134,9 @@ Defaults:
 
 - _routerExecutor_: the name of the executor (the value of "$exec" keyword in the instruction) used to access Express router, `"router"` is used by default.
 - _basePath_: the path used as a prefix to paths in the script $exec instruction arguments.
+- _processResponse_: possible values:
+  - `"body"` - return only response body if status code is < 300, throw an exception otherwise.
+  - function - custom function to process the response object, can throw an exception or return the object to be used as the result.
 - _jsonscript_: options passed to JSONScript interpreter [jsonscript-js](https://github.com/JSONScript/jsonscript-js).
 - _Promise_: an optional Promise class, the native Promise is used by default.
 

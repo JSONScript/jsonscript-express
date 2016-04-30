@@ -15,17 +15,10 @@ function jsonscriptExpress(app, options) {
     jsonscript: { strict: true },
     Promise: (typeof Promise !== 'undefined') && Promise
   });
+
+  var processResponce = processResponceFunc(options);
   var js = JSONScript(options.jsonscript);
-  METHODS.forEach(function (method) {
-    execRouter[method] = function(args) {
-      if (args.method && args.method != method) {
-        console.warn('method specified in args (' + args.method +
-                      ') is different from $method in instruction (' + method + '), used ' + method);
-      }
-      args.method = method;
-      return execRouter(args);
-    };
-  });
+  addExecutorMethods();
   js.addExecutor(options.routerExecutor, execRouter);
   evaluator.js = js;
 
@@ -41,7 +34,7 @@ function jsonscriptExpress(app, options) {
       .then(function (value) {
         res.send(value);
       }, function (err) {
-        res.status(err.errors ? 400 : 500)
+        res.status(err.errors ? 400 : err.statusCode || 500)
         .send({
           error: err.message,
           errors: err.errors
@@ -67,10 +60,53 @@ function jsonscriptExpress(app, options) {
     return new options.Promise(function (resolve, reject) {
       request.end(function (err, resp) {
         if (err) return reject(err);
-        resp = _.pick(resp, 'statusCode', 'headers', 'body');
-        resp.request = args;
-        resolve(resp);
+        resolve(processResponce(resp, args));
       });
     });
   }
+
+
+  function addExecutorMethods() {
+    METHODS.forEach(function (method) {
+      execRouter[method] = function(args) {
+        if (args.method && args.method != method) {
+          console.warn('method specified in args (' + args.method +
+                        ') is different from $method in instruction (' + method + '), used ' + method);
+        }
+        args.method = method;
+        return execRouter(args);
+      };
+    });
+  }
 }
+
+
+function processResponceFunc(options) {
+  return options.processResponse == 'body'
+          ? bodyProcessResponce
+          : typeof options.processResponse == 'function'
+            ? options.processResponse
+            : defaultProcessResponse;
+}
+
+
+function bodyProcessResponce(resp) {
+  if (resp.statusCode < 300) return resp.body;
+  throw new HttpError(resp);
+}
+
+
+function defaultProcessResponse(resp, args) {
+  resp = _.pick(resp, 'statusCode', 'headers', 'body');
+  resp.request = args;
+  return resp;
+}
+
+
+function HttpError(resp) {
+    this.message = resp.body ? JSON.stringify(resp.body) : 'Error';
+    this.statusCode = resp.statusCode;
+}
+
+HttpError.prototype = Object.create(Error.prototype);
+HttpError.prototype.constructor = HttpError;

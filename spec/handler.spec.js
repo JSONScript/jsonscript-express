@@ -15,10 +15,7 @@ describe('jsonscript handler', function() {
 
   describe('single instruction without $method', function() {
     it('should process GET', function (done) {
-      test(app)
-      .post('/js')
-      .set('Accept', 'application/json')
-      .send({
+      send({
         script: {
           $exec: 'router',
           $args: {
@@ -26,19 +23,28 @@ describe('jsonscript handler', function() {
             path: '/object/1'
           }
         }
-      })
-      .expect(200)
-      .end(function (err, resp) {
+      }, function (err, resp) {
+        assertGetResult(resp.body, 'object', '1');
+        done();
+      });
+    });
+
+    it('should process GET with macro', function (done) {
+      send({
+        script: {
+          $$router: {
+            method: 'get',
+            path: '/object/1'
+          }
+        }
+      }, function (err, resp) {
         assertGetResult(resp.body, 'object', '1');
         done();
       });
     });
 
     it('should process POST', function (done) {
-      test(app)
-      .post('/js')
-      .set('Accept', 'application/json')
-      .send({
+      send({
         script: {
           $exec: 'router',
           $args: {
@@ -47,9 +53,22 @@ describe('jsonscript handler', function() {
             body: { foo: 'bar' }
           }
         }
-      })
-      .expect(200)
-      .end(function (err, resp) {
+      }, function (err, resp) {
+        assertPostResult(resp.body, 'object', { foo: 'bar' });
+        done();
+      });
+    });
+
+    it('should process POST with macro', function (done) {
+      send({
+        script: {
+          $$router: {
+            method: 'post',
+            path: '/object',
+            body: { foo: 'bar' }
+          }
+        }
+      }, function (err, resp) {
         assertPostResult(resp.body, 'object', { foo: 'bar' });
         done();
       });
@@ -58,10 +77,7 @@ describe('jsonscript handler', function() {
 
   describe('single instruction with $method', function() {
     it('should process GET', function (done) {
-      test(app)
-      .post('/js')
-      .set('Accept', 'application/json')
-      .send({
+      send({
         script: {
           $exec: 'router',
           $method: 'get',
@@ -69,19 +85,25 @@ describe('jsonscript handler', function() {
             path: '/object/1'
           }
         }
-      })
-      .expect(200)
-      .end(function (err, resp) {
+      }, function (err, resp) {
+        assertGetResult(resp.body, 'object', '1');
+        done();
+      });
+    });
+
+    it('should process GET with macro', function (done) {
+      send({
+        script: {
+          '$$router.get': { path: '/object/1' }
+        }
+      }, function (err, resp) {
         assertGetResult(resp.body, 'object', '1');
         done();
       });
     });
 
     it('should process GET even if method in $args is different', function (done) {
-      test(app)
-      .post('/js')
-      .set('Accept', 'application/json')
-      .send({
+      send({
         script: {
           $exec: 'router',
           $method: 'get',
@@ -90,19 +112,14 @@ describe('jsonscript handler', function() {
             path: '/object/1'
           }
         }
-      })
-      .expect(200)
-      .end(function (err, resp) {
+      }, function (err, resp) {
         assertGetResult(resp.body, 'object', '1');
         done();
       });
     });
 
     it('should process POST', function (done) {
-      test(app)
-      .post('/js')
-      .set('Accept', 'application/json')
-      .send({
+      send({
         script: {
           $exec: 'router',
           $method: 'post',
@@ -111,9 +128,21 @@ describe('jsonscript handler', function() {
             body: { foo: 'bar' }
           }
         }
-      })
-      .expect(200)
-      .end(function (err, resp) {
+      }, function (err, resp) {
+        assertPostResult(resp.body, 'object', { foo: 'bar' });
+        done();
+      });
+    });
+
+    it('should process POST with macro', function (done) {
+      send({
+        script: {
+          '$$router.post': {
+            path: '/object',
+            body: { foo: 'bar' }
+          }
+        }
+      }, function (err, resp) {
         assertPostResult(resp.body, 'object', { foo: 'bar' });
         done();
       });
@@ -122,10 +151,7 @@ describe('jsonscript handler', function() {
 
   describe('parallel evaluation', function() {
     it('should process GETs', function (done) {
-      test(app)
-      .post('/js')
-      .set('Accept', 'application/json')
-      .send({
+      send({
         script: {
           obj1: {
             $exec: 'router',
@@ -142,9 +168,20 @@ describe('jsonscript handler', function() {
             }
           }
         }
-      })
-      .expect(200)
-      .end(function (err, resp) {
+      }, function (err, resp) {
+        assertGetResult(resp.body.obj1, 'object', '1');
+        assertGetResult(resp.body.obj2, 'object', '2');
+        done();
+      });
+    });
+
+    it('should process GETs with macros', function (done) {
+      send({
+        script: {
+          obj1: { '$$router.get': { path: '/object/1' } },
+          obj2: { '$$router.get': { path: '/object/2' } }
+        }
+      }, function (err, resp) {
         assertGetResult(resp.body.obj1, 'object', '1');
         assertGetResult(resp.body.obj2, 'object', '2');
         done();
@@ -154,10 +191,7 @@ describe('jsonscript handler', function() {
 
   describe('sequential evaluation', function() {
     it('should process GET and then POST', function (done) {
-      test(app)
-      .post('/js')
-      .set('Accept', 'application/json')
-      .send({
+      send({
         script: [
           {
             $exec: 'router',
@@ -175,9 +209,20 @@ describe('jsonscript handler', function() {
             }
           }
         ]
-      })
-      .expect(200)
-      .end(function (err, resp) {
+      }, function (err, resp) {
+        assertGetResult(resp.body[0], 'object', '1');
+        assertPostResult(resp.body[1], 'object', { foo: 'bar' });
+        done();
+      });
+    });
+
+    it('should process GET and then POST with macros', function (done) {
+      send({
+        script: [
+          { '$$router.get': { path: '/object/1' } },
+          { '$$router.post': { path: '/object', body: { foo: 'bar' } } }
+        ]
+      }, function (err, resp) {
         assertGetResult(resp.body[0], 'object', '1');
         assertPostResult(resp.body[1], 'object', { foo: 'bar' });
         done();
@@ -185,6 +230,37 @@ describe('jsonscript handler', function() {
     });
   });
 
+  describe('calculations', function() {
+    it('addition with macro', function (done) {
+      send({
+        script: { '$+': [1, 2, 3] }
+      }, function (err, resp) {
+        assert(!err);
+        assert.strictEqual(resp.body, 6);
+        done();
+      });
+    });
+  });
+
+  describe('array', function() {
+    it('array filter with macro', function (done) {
+      send({
+        script: {
+          '$$array.filter': {
+            data: [-2, -1, 0, 1, 2, 3],
+            iterator: {
+              $func: { '$>': [ {$data: '/num'}, 0 ] },
+              $args: ['num']
+            }
+          }
+        }
+      }, function (err, resp) {
+        assert(!err);
+        assert.deepStrictEqual(resp.body, [1, 2, 3]);
+        done();
+      });
+    });
+  });
 
   describe('options', function() {
     describe('processResponse: "body"', function() {
@@ -193,10 +269,7 @@ describe('jsonscript handler', function() {
       });
 
       it('should return response body only', function (done) {
-        test(app)
-        .post('/js')
-        .set('Accept', 'application/json')
-        .send({
+        send({
           script: {
             $exec: 'router',
             $args: {
@@ -204,15 +277,22 @@ describe('jsonscript handler', function() {
               path: '/object/1'
             }
           }
-        })
-        .expect(200)
-        .end(function (err, resp) {
+        }, function (err, resp) {
           assert.deepEqual(resp.body, { name: 'object', id: 1, info: 'resource object id 1' });
           done();
         });
       });
     });
   });
+
+  function send(reqBody, callback) {
+    test(app)
+    .post('/js')
+    .set('Accept', 'application/json')
+    .send(reqBody)
+    .expect(200)
+    .end(callback);
+  }
 });
 
 

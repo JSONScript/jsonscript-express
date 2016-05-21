@@ -32,7 +32,7 @@ function jsonscriptExpress(app, options) {
     if (valid) {
       js.evaluate(script, data)
       .then(function (value) {
-        res.send(value);
+        res.json(value);
       }, function (err) {
         res.status(err.errors ? 400 : err.statusCode || 500)
         .send({

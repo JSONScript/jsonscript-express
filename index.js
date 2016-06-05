@@ -52,7 +52,7 @@ function jsonscriptExpress(app, options) {
 
   function execRouter(args) {
     var request = processRequest(app)[args.method](options.basePath + args.path)
-    .set('Accept', 'application/json')
+    .set('Accept', 'application/json');
 
     if (args.headers) request.set(args.headers);
     if (args.body) request.send(args.body);
@@ -104,8 +104,8 @@ function defaultProcessResponse(resp, args) {
 
 
 function HttpError(resp) {
-    this.message = resp.body ? JSON.stringify(resp.body) : 'Error';
-    this.statusCode = resp.statusCode;
+  this.message = resp.body ? JSON.stringify(resp.body) : 'Error';
+  this.statusCode = resp.statusCode;
 }
 
 HttpError.prototype = Object.create(Error.prototype);

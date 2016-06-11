@@ -49,26 +49,6 @@ app.listen(3000);
 
 Now you can send POST requests to `/js` endpoint with the body containing the script and an optional data instance that will be processed by JSONScript interpreter. For example, with this request:
 
-```javascript
-{
-  "script": {
-    "res1": {
-      "$exec": "router", // executor name can be changed in options
-      "$method": "get",  // $method can be get/post/put/delete
-      "$args": { "path": "/resource/1" }
-      // method property in $args can be used instead of $method
-    },
-    "res2": {
-      "$exec": "router",
-      "$method": "get",
-      "$args": { "path": "/resource/2" }
-    }
-  }
-}
-```
-
-or using short JSONScript syntax:
-
 ```json
 {
   "script": {

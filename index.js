@@ -16,7 +16,7 @@ function jsonscriptExpress(app, options) {
     Promise: (typeof Promise !== 'undefined') && Promise
   });
 
-  var processResponce = processResponceFunc(options);
+  var processResponse = processResponseFunc(options);
   var js = JSONScript(options.jsonscript);
   addExecutorMethods();
   js.addExecutor(options.routerExecutor, execRouter);
@@ -60,7 +60,8 @@ function jsonscriptExpress(app, options) {
     return new options.Promise(function (resolve, reject) {
       request.end(function (err, resp) {
         if (err) return reject(err);
-        resolve(processResponce(resp, args));
+        try { resolve(processResponse(resp, args)); }
+        catch(e) { reject(e); }
       });
     });
   }
@@ -81,16 +82,16 @@ function jsonscriptExpress(app, options) {
 }
 
 
-function processResponceFunc(options) {
+function processResponseFunc(options) {
   return options.processResponse == 'body'
-          ? bodyProcessResponce
+          ? bodyProcessResponse
           : typeof options.processResponse == 'function'
             ? options.processResponse
             : defaultProcessResponse;
 }
 
 
-function bodyProcessResponce(resp) {
+function bodyProcessResponse(resp) {
   if (resp.statusCode < 300) return resp.body;
   throw new HttpError(resp);
 }

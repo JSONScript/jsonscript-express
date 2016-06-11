@@ -21,6 +21,10 @@ module.exports = function createApp(jsonscriptOptions) {
     send(res, req.params.name, id, req.body);
   });
 
+  app.get('/api/:name/:id/error', function (req, res) {
+    send(res.status(500), req.params.name, req.params.id);
+  });
+
   jsonscriptOptions = jsonscriptOptions
                       ? _.extend({ basePath: '/api' }, jsonscriptOptions)
                       : { basePath: '/api' };

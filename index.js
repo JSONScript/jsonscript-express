@@ -8,7 +8,7 @@ module.exports = jsonscriptExpress;
 
 
 var METHODS = ['get', 'post', 'put', 'delete'];
-function jsonscriptExpress(app, options) {
+function jsonscriptExpress(app, options, js) {
   options = _.defaults(options, {
     routerExecutor: 'router',
     basePath: '',
@@ -17,7 +17,7 @@ function jsonscriptExpress(app, options) {
   });
 
   var processResponse = processResponseFunc(options);
-  var js = JSONScript(options.jsonscript);
+  js = js || new JSONScript(options.jsonscript);
   addExecutorMethods();
   js.addExecutor(options.routerExecutor, execRouter);
   evaluator.js = js;
